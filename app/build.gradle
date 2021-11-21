@@ -78,4 +78,9 @@ dependencies {
 
     implementation 'androidx.ui:ui-layout:0.1.0-dev03'
     implementation 'com.github.kunalsale:PokemonSDK:1.0.3'
+
+    // Test rules and transitive dependencies:
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_version")
+    // Needed for createComposeRule, but not createAndroidComposeRule:
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
 }
