@@ -74,10 +74,8 @@ dependencies {
     implementation "com.google.dagger:hilt-android:2.38.1"
     kapt "com.google.dagger:hilt-compiler:2.38.1"
 
-    //Retrofit
-    implementation "com.squareup.retrofit2:converter-moshi:2.4.0"
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
 
-    implementation files('libs/pokemon_sdk-debug.aar')
+    implementation 'androidx.ui:ui-layout:0.1.0-dev03'
+    implementation 'com.github.kunalsale:PokemonSDK:1.0.3'
 }
