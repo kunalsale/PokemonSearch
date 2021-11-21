@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,7 +31,8 @@ import com.ksale.pokemonsearch.viewmodels.UIState
 
 @Composable
 fun PokemonSearchScreen(viewModel: PokemonSearchViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
-    var query by remember { viewModel.query }
+    // To persist the query through screen rotation
+    var query by rememberSaveable { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
 
     PokemonSearchScreen(

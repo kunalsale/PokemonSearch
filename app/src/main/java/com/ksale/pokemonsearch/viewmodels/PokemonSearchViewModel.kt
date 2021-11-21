@@ -1,17 +1,18 @@
 package com.ksale.pokemonsearch.viewmodels
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ksale.pokemon_sdk.api.models.FlavorTextEntry
 import com.ksale.pokemon_sdk.usecase.PokemonState
 import com.ksale.pokemon_sdk.usecase.PokemonUseCase
 import com.ksale.pokemon_sdk.usecase.ShakespeareTranslatorUseCase
 import com.ksale.pokemon_sdk.usecase.TranslatorState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,10 +25,11 @@ class PokemonSearchViewModel @Inject constructor() : ViewModel() {
     lateinit var shakespeareTranslatorUseCase: ShakespeareTranslatorUseCase
 
     private var pokemonDetail = PokemonMetaData()
-    var query = mutableStateOf("")
+
     private val _uiState = MutableStateFlow<UIState>(UIState.Loading(false))
     val uiState: StateFlow<UIState> = _uiState
 
+    // Fetches the sprite url for the pokemon name
     fun getPokemon(pokemonName: String) {
         viewModelScope.launch {
             _uiState.emit(UIState.Loading(true))
@@ -48,15 +50,14 @@ class PokemonSearchViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    // Fetches the sprite url for the pokemon name
     fun getShakeSpeareanDescription(pokemonName: String) {
         viewModelScope.launch {
             when (val result = pokemonUseCase.getPokemonSpecies(pokemonName = pokemonName)) {
                 is PokemonState.PokemonSpecies -> {
                     val pokemonSpecies = result.response
-                    Log.i("ViewModel", " getShakeSpeareanDescription " + pokemonDetail.toString())
-                    translateTheDescription(
-                        pokemonSpecies.flavor_text_entries[0].flavor_text
-                    )
+                    val pokemonFlavorText = getEnglishLanguageFlavorEntry(pokemonSpecies.flavor_text_entries)
+                    translateTheDescription(pokemonFlavorText)
                 }
                 is PokemonState.PokemonError -> {
                     _uiState.emit(UIState.ErrorState(result.shouldRetry, result.errorMessage))
@@ -68,13 +69,24 @@ class PokemonSearchViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    private suspend fun getEnglishLanguageFlavorEntry(entries: List<FlavorTextEntry>): String =
+        withContext(Dispatchers.Default) {
+            var flavorText = ""
+            for (flavor_entry in entries) {
+                if (flavor_entry.language.name == "en") {
+                    flavorText = flavor_entry.flavor_text
+                    break
+                }
+            }
+            flavorText
+        }
+
     private suspend fun translateTheDescription(flavorText: String) {
         val result = shakespeareTranslatorUseCase.translateToShakespeare(flavorText)
         _uiState.emit(UIState.Loading(false))
         when (result) {
             is TranslatorState.ShakespeareTranslated -> {
                 pokemonDetail.translatedString = result.translated
-                Log.i("ViewModel", " translateTheDescription " + pokemonDetail.toString())
                 _uiState.emit(UIState.PokemonDetailState(pokemonDetail.copy()))
             }
             is TranslatorState.ShakespeareError -> {
