@@ -47,7 +47,7 @@ fun PokemonSearchScreen(viewModel: PokemonSearchViewModel = androidx.lifecycle.v
 }
 
 @Composable
-private fun PokemonSearchScreen(
+fun PokemonSearchScreen(
     query: String,
     uiState: UIState,
     onValueChanged: (query: String) -> Unit,
@@ -130,7 +130,7 @@ fun SearchBar(
             trailingIcon = {
                 Icon(
                     imageVector = if (query.isEmpty()) Icons.Filled.Search else Icons.Filled.Clear,
-                    contentDescription = null,
+                    contentDescription = if (query.isEmpty()) "" else "Press icon to clear the text" ,
                     modifier = Modifier.clickable {
                         onValueChange("")
                     })
@@ -155,7 +155,7 @@ fun LoadingScreen() {
         Image(
             modifier = Modifier.wrapContentSize(),
             painter = painterResource(id = R.drawable.pokeball),
-            contentDescription = ""
+            contentDescription = "API call in progress, Please wait"
         )
     }
 }
@@ -170,7 +170,7 @@ fun ErrorScreen(shouldRetry: Boolean, errorMessage: String, onRefreshClick: () -
         if (shouldRetry) {
             Icon(
                 imageVector = Icons.Filled.Refresh,
-                contentDescription = "",
+                contentDescription = "Press icon to retry",
                 modifier = Modifier
                     .clickable {
                         onRefreshClick()
